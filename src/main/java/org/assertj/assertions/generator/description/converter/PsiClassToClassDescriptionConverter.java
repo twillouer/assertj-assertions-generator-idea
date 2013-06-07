@@ -12,12 +12,9 @@
  */
 package org.assertj.assertions.generator.description.converter;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiType;
+import static org.assertj.assertions.generator.util.PsiClassUtil.getterMethodsOf;
+import static org.assertj.assertions.generator.util.PsiClassUtil.propertyNameOf;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -27,14 +24,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.assertj.assertions.generator.description.ClassDescription;
 import org.assertj.assertions.generator.description.GetterDescription;
 import org.assertj.assertions.generator.description.TypeDescription;
 import org.assertj.assertions.generator.description.TypeName;
 import org.assertj.assertions.generator.util.PsiClassUtil;
-import static org.assertj.assertions.generator.util.PsiClassUtil.getterMethodsOf;
-import static org.assertj.assertions.generator.util.PsiClassUtil.propertyNameOf;
 import org.jetbrains.annotations.NotNull;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassType;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiType;
 
 public class PsiClassToClassDescriptionConverter implements ClassDescriptionConverter<PsiClass> {
   private static final Logger logger = Logger.getInstance(PsiClassToClassDescriptionConverter.class);
@@ -82,19 +86,9 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     } else if (psiClassUtil.isIterable(propertyType)) {
       typeDescription.setIterable(true);
 
-        logger.info("type is " + propertyType + " class : " + propertyType.getClass());
-      // ParameterizedType parameterizedType = (ParameterizedType) getter.getGenericReturnType();
-      ParameterizedType parameterizedType = null;
-      if (parameterizedType.getActualTypeArguments()[0] instanceof GenericArrayType) {
-        GenericArrayType genericArrayType = (GenericArrayType) parameterizedType.getActualTypeArguments()[0];
-        Class<?> parameterClass = getClass(genericArrayType.getGenericComponentType());
-        typeDescription.setElementTypeName(new TypeName(parameterClass));
-        typeDescription.setArray(true);
-      } else {
-        // Class<?> parameterClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-        typeDescription.setElementTypeName(new TypeName(getClass(parameterizedType.getActualTypeArguments()[0])));
-        typeDescription.setIterable(true);
-      }
+      PsiClassType classType = (PsiClassType) propertyType;
+      typeDescription.setElementTypeName(new TypeName(classType.getInternalCanonicalText()));
+      // SetArray ?
     }
     return typeDescription;
   }

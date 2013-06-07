@@ -1,13 +1,13 @@
 /*
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
+ * 
  * Copyright @2010-2011 the original author or authors.
  */
 package org.assertj.assertions.generator.util;
@@ -18,7 +18,6 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.uncapitalize;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -26,9 +25,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,12 +33,6 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.assertions.generator.description.TypeName;
 import org.jetbrains.annotations.NotNull;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -140,14 +131,6 @@ public class PsiClassUtil {
     return fileName.endsWith(CLASS_SUFFIX);
   }
 
-  private static Class<?> tryToLoadClass(String className, ClassLoader classLoader) {
-    try {
-      return loadClass(className, classLoader);
-    } catch (ClassNotFoundException e) {
-      return null;
-    }
-  }
-
   private static Class<?> loadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
     return Class.forName(className, true, classLoader);
   }
@@ -178,9 +161,14 @@ public class PsiClassUtil {
     return new TypeName(clazz.getName(), pkg.getName());
   }
 
-  public boolean isIterable(PsiClass returnType) {
-    PsiClass iterable = javaPsiFacade.findClass(Iterable.class.getName(), GlobalSearchScope.allScope(project));
-    return returnType.isInheritor(iterable, true);
+  public boolean isIterable(PsiType type) {
+    if (type instanceof PsiClassType) {
+      PsiClassType classType = (PsiClassType) type;
+      PsiClass clazz = classType.resolve();
+      PsiClass iterable = javaPsiFacade.findClass(Iterable.class.getName(), GlobalSearchScope.allScope(project));
+      return clazz.isInheritor(iterable, true);
+    }
+    return false;
     // return Iterable.class.isAssignableFrom(returnType);
   }
 
@@ -267,20 +255,21 @@ public class PsiClassUtil {
     return propertyType instanceof PsiArrayType;
   }
 
-  public boolean isIterable(PsiType type) {
-
-    // ClassInheritorsSearch.
-    if (type instanceof PsiClassType) {
-      PsiClassType classType = (PsiClassType) type;
-      PsiClass iterable = javaPsiFacade.findClass(Iterable.class.getName(), GlobalSearchScope.allScope(project));
-      logger.info("iterable : " + iterable);
-      logger.info("classType : " + classType);
-      for (PsiType psiType : iterable.getExtendsListTypes()) {
-        logger.info("psiType : " + psiType + " isAssignableFrom : " + classType.isAssignableFrom(psiType));
-      }
-    }
-    return false; // To change body of created methods use File | Settings | File Templates.
-  }
+  //
+  // public boolean isIterable(PsiType type) {
+  //
+  // // ClassInheritorsSearch.
+  // if (type instanceof PsiClassType) {
+  // PsiClassType classType = (PsiClassType) type;
+  // PsiClass iterable = javaPsiFacade.findClass(Iterable.class.getName(), GlobalSearchScope.allScope(project));
+  // logger.info("iterable : " + iterable);
+  // logger.info("classType : " + classType);
+  // for (PsiType psiType : iterable.getExtendsListTypes()) {
+  // logger.info("psiType : " + psiType + " isAssignableFrom : " + classType.isAssignableFrom(psiType));
+  // }
+  // }
+  // return false; // To change body of created methods use File | Settings | File Templates.
+  // }
 
   public TypeName getTypeName(PsiType type) {
     if (type instanceof PsiPrimitiveType) {
