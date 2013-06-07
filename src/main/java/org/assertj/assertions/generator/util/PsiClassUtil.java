@@ -73,69 +73,6 @@ public class PsiClassUtil {
   }
 
   /**
-   * Get <b>public</b> classes in given directory (recursively).
-   * <p>
-   * Note that <b>anonymous</b> and <b>local</b> classes are excluded from the resulting list.
-   * 
-   * @param directory directory where to look for classes
-   * @param packageName package name corresponding to directory
-   * @param classLoader used classloader
-   * @return
-   * @throws java.io.UnsupportedEncodingException
-   */
-  private static List<Class<?>> getClassesInDirectory(File directory, String packageName, ClassLoader classLoader)
-      throws UnsupportedEncodingException {
-    List<Class<?>> classes = new ArrayList<Class<?>>();
-    // Capture all the .class files in this directory
-    // Get the list of the files contained in the package
-    File[] files = directory.listFiles();
-    for (File currentFile : files) {
-      String currentFileName = currentFile.getName();
-      if (isClass(currentFileName)) {
-        // CHECKSTYLE:OFF
-        try {
-          // removes the .class extension
-          String className = packageName + '.' + StringUtils.remove(currentFileName, CLASS_SUFFIX);
-          Class<?> loadedClass = loadClass(className, classLoader);
-          // we are only interested in public classes that are neither anonymous nor local
-          if (isClassCandidateToAssertionsGeneration(loadedClass)) {
-            classes.add(loadedClass);
-          }
-        } catch (Throwable e) {
-          // do nothing. this class hasn't been found by the loader, and we don't care.
-        }
-        // CHECKSTYLE:ON
-      } else if (currentFile.isDirectory()) {
-        // It's another package
-        String subPackageName = packageName + ClassUtils.PACKAGE_SEPARATOR + currentFileName;
-        // Ask for all resources for the path
-        URL resource = classLoader.getResource(subPackageName.replace('.', File.separatorChar));
-        File subDirectory = new File(URLDecoder.decode(resource.getPath(), "UTF-8"));
-        List<Class<?>> classesForSubPackage = getClassesInDirectory(subDirectory, subPackageName, classLoader);
-        classes.addAll(classesForSubPackage);
-      }
-    }
-    return classes;
-  }
-
-  /**
-   * @param loadedClass
-   * @return
-   */
-  private static boolean isClassCandidateToAssertionsGeneration(Class<?> loadedClass) {
-    return loadedClass != null && isPublic(loadedClass.getModifiers()) && !loadedClass.isAnonymousClass()
-        && !loadedClass.isLocalClass();
-  }
-
-  private static boolean isClass(String fileName) {
-    return fileName.endsWith(CLASS_SUFFIX);
-  }
-
-  private static Class<?> loadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
-    return Class.forName(className, true, classLoader);
-  }
-
-  /**
    * Returns the property name of given getter method, examples :
    * 
    * <pre>
@@ -169,23 +106,15 @@ public class PsiClassUtil {
       return clazz.isInheritor(iterable, true);
     }
     return false;
-    // return Iterable.class.isAssignableFrom(returnType);
-  }
-
-  public boolean isArray(PsiClass returnType) {
-    PsiClass iterable = JavaPsiFacade.getInstance(null).findClass(Iterable.class.getName(),
-        GlobalSearchScope.allScope(project));
-    return returnType.isInheritor(iterable, true);
-    // return Iterable.class.isAssignableFrom(returnType);
   }
 
   public static boolean isStandardGetter(PsiMethod method) {
-    return isValidStandardGetterName(method.getName()) && !Void.TYPE.equals(method.getReturnType())
+    return isValidGetterName(method.getName()) && !"void".equalsIgnoreCase(method.getReturnType().getInternalCanonicalText())
         && method.getParameterList().getParameters().length == 0;
   }
 
   public static boolean isBooleanGetter(PsiMethod method) {
-    return isValidBooleanGetterName(method.getName()) && Boolean.TYPE.equals(method.getReturnType())
+    return isValidBooleanGetterName(method.getName()) && "boolean".equals(method.getReturnType().getInternalCanonicalText())
         && method.getParameterList().getParameters().length == 0;
   }
 
@@ -216,8 +145,7 @@ public class PsiClassUtil {
   }
 
   private static boolean isNotDefinedInObjectClass(PsiMethod method) {
-    // TODO ?!
-    return !method.getContainingClass().equals(Object.class);
+    return method.getReturnType() != null;
   }
 
   public static Set<Class<?>> getClassesRelatedTo(Type type) {
@@ -254,22 +182,6 @@ public class PsiClassUtil {
   public boolean isArray(PsiType propertyType) {
     return propertyType instanceof PsiArrayType;
   }
-
-  //
-  // public boolean isIterable(PsiType type) {
-  //
-  // // ClassInheritorsSearch.
-  // if (type instanceof PsiClassType) {
-  // PsiClassType classType = (PsiClassType) type;
-  // PsiClass iterable = javaPsiFacade.findClass(Iterable.class.getName(), GlobalSearchScope.allScope(project));
-  // logger.info("iterable : " + iterable);
-  // logger.info("classType : " + classType);
-  // for (PsiType psiType : iterable.getExtendsListTypes()) {
-  // logger.info("psiType : " + psiType + " isAssignableFrom : " + classType.isAssignableFrom(psiType));
-  // }
-  // }
-  // return false; // To change body of created methods use File | Settings | File Templates.
-  // }
 
   public TypeName getTypeName(PsiType type) {
     if (type instanceof PsiPrimitiveType) {
