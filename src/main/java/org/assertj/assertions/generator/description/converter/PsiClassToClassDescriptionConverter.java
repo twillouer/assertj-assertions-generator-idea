@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiArrayType;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiMethod;
@@ -55,9 +56,9 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     classDescription.addTypeToImport(getNeededImportsFor(clazz));
 
     // Hack for "no package"
-//    if ("".equals(classDescription.getPackageName())) {
-//
-//    }
+    // if ("".equals(classDescription.getPackageName())) {
+    //
+    // }
     return classDescription;
   }
 
@@ -80,17 +81,24 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     final PsiType propertyType = getter.getReturnType();
     final TypeDescription typeDescription = new TypeDescription(psiClassUtil.getTypeName(propertyType));
     if (psiClassUtil.isArray(propertyType)) {
-      typeDescription.setElementTypeName(new TypeName(propertyType.getPresentableText()));
+      PsiArrayType psiArrayType = (PsiArrayType) propertyType;
+      typeDescription.setElementTypeName(psiClassUtil.getTypeName(psiArrayType.getComponentType()));
       typeDescription.setArray(true);
     } else if (psiClassUtil.isIterable(propertyType)) {
       typeDescription.setIterable(true);
-
       PsiClassType classType = (PsiClassType) propertyType;
-      typeDescription.setElementTypeName(new TypeName(classType.getDeepComponentType().getCanonicalText()));
-
-      logger.info("I am a " + classType.getClassName() + " 1 :" + classType.getInternalCanonicalText());
-      logger.info("I am a " + classType.getClassName() + " 1 :" + classType.getCanonicalText());
-      // SetArray ?
+      if (classType.getParameterCount() != 0) {
+        PsiType type = classType.getParameters()[0];
+        typeDescription.setArray(psiClassUtil.isArray(type));
+        if (typeDescription.isArray()) {
+          PsiArrayType psiArrayType = (PsiArrayType) type;
+          typeDescription.setElementTypeName(psiClassUtil.getTypeName(psiArrayType.getComponentType()));
+        } else {
+          typeDescription.setElementTypeName(psiClassUtil.getTypeName(type));
+        }
+      } else {
+        typeDescription.setElementTypeName(new TypeName(Object.class));
+      }
     }
     return typeDescription;
   }
@@ -103,7 +111,7 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
       PsiType type = getter.getReturnType();
       if (type instanceof PsiClassType) {
         PsiClassType classType = (PsiClassType) type;
-        typeToImports.add(new TypeName(classType.getClassName()));
+        typeToImports.add(psiClassUtil.getTypeName(classType));
       }
     }
     return typeToImports;

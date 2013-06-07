@@ -13,24 +13,17 @@
 package org.assertj.assertions.generator.util;
 
 import static java.lang.Character.isUpperCase;
-import static java.lang.reflect.Modifier.isPublic;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.uncapitalize;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.assertj.assertions.generator.description.TypeName;
 import org.jetbrains.annotations.NotNull;
 
@@ -109,12 +102,14 @@ public class PsiClassUtil {
   }
 
   public static boolean isStandardGetter(PsiMethod method) {
-    return isValidGetterName(method.getName()) && !"void".equalsIgnoreCase(method.getReturnType().getInternalCanonicalText())
+    return isValidGetterName(method.getName())
+        && !"void".equalsIgnoreCase(method.getReturnType().getInternalCanonicalText())
         && method.getParameterList().getParameters().length == 0;
   }
 
   public static boolean isBooleanGetter(PsiMethod method) {
-    return isValidBooleanGetterName(method.getName()) && "boolean".equals(method.getReturnType().getInternalCanonicalText())
+    return isValidBooleanGetterName(method.getName())
+        && "boolean".equals(method.getReturnType().getInternalCanonicalText())
         && method.getParameterList().getParameters().length == 0;
   }
 
@@ -148,37 +143,6 @@ public class PsiClassUtil {
     return method.getReturnType() != null;
   }
 
-  public static Set<Class<?>> getClassesRelatedTo(Type type) {
-    Set<Class<?>> classes = new HashSet<Class<?>>();
-
-    // non generic type : just add current type.
-    if (type instanceof Class) {
-      classes.add((Class<?>) type);
-      return classes;
-    }
-
-    // generic type : add current type and its parameter types
-    if (type instanceof ParameterizedType) {
-      ParameterizedType parameterizedType = (ParameterizedType) type;
-      for (Type actualTypeArgument : parameterizedType.getActualTypeArguments()) {
-        if (actualTypeArgument instanceof ParameterizedType) {
-          classes.addAll(getClassesRelatedTo(actualTypeArgument));
-        } else if (actualTypeArgument instanceof Class) {
-          classes.add((Class<?>) actualTypeArgument);
-        } else if (actualTypeArgument instanceof GenericArrayType) {
-          classes.addAll(getClassesRelatedTo(actualTypeArgument));
-        }
-        // throw new IllegalArgumentException("cannot find type " + actualTypeArgument);
-        // I'm almost sure we should not arrive here !
-      }
-      Type rawType = parameterizedType.getRawType();
-      if (rawType instanceof Class) {
-        classes.add((Class<?>) rawType);
-      }
-    }
-    return classes;
-  }
-
   public boolean isArray(PsiType propertyType) {
     return propertyType instanceof PsiArrayType;
   }
@@ -189,7 +153,7 @@ public class PsiClassUtil {
     }
     if (type instanceof PsiClassType) {
       PsiClassType classType = (PsiClassType) type;
-      return new TypeName(classType.getClassName());
+      return new TypeName(classType.getCanonicalText());
     }
     return new TypeName(type.getCanonicalText());
   }
