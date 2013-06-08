@@ -54,11 +54,6 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     ClassDescription classDescription = new ClassDescription(psiClassUtil.getTypeName(clazz));
     classDescription.addGetterDescriptions(getterDescriptionsOf(clazz));
     classDescription.addTypeToImport(getNeededImportsFor(clazz));
-
-    // Hack for "no package"
-    // if ("".equals(classDescription.getPackageName())) {
-    //
-    // }
     return classDescription;
   }
 
@@ -67,10 +62,9 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     Set<GetterDescription> getterDescriptions = new TreeSet<GetterDescription>();
 
     List<PsiMethod> getters = getterMethodsOf(clazz);
-    logger.info("Getters ; " + getters);
     for (PsiMethod getter : getters) {
       final TypeDescription typeDescription = getTypeDescription(clazz, getter);
-      logger.info("Getter ; " + getter + " typeDescription : " + typeDescription);
+      logger.debug("Getter ; " + getter + " typeDescription : " + typeDescription);
       getterDescriptions.add(new GetterDescription(propertyNameOf(getter), typeDescription));
     }
     return getterDescriptions;
@@ -111,7 +105,7 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
       PsiType type = getter.getReturnType();
       if (type instanceof PsiClassType) {
         PsiClassType classType = (PsiClassType) type;
-        typeToImports.add(psiClassUtil.getTypeName(classType));
+        typeToImports.add(psiClassUtil.getTypeName(classType.rawType()));
       }
     }
     return typeToImports;
