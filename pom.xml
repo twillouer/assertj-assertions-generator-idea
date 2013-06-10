@@ -20,8 +20,9 @@
   </scm>
 
    <properties>
-       <version-intellij>11</version-intellij>
+       <version-intellij>12</version-intellij>
    </properties>
+
   <repositories>
     <repository>
       <id>project</id>

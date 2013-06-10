@@ -28,12 +28,12 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.12" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.12" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:annotations:11" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:bootstrap:11" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:extensions:11" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:idea:11" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:openapi:11" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:util:11" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:annotations:12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:bootstrap:12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:extensions:12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:idea:12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:openapi:12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij.idea:util:12" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.assertj:assertj-core:1.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
