@@ -12,6 +12,8 @@
  */
 package org.assertj.assertions.generator.description.converter;
 
+import com.intellij.psi.PsiJavaCodeReferenceElement;
+import java.util.ArrayList;
 import static org.assertj.assertions.generator.util.PsiClassUtil.getterMethodsOf;
 import static org.assertj.assertions.generator.util.PsiClassUtil.propertyNameOf;
 
@@ -64,8 +66,14 @@ public class PsiClassToClassDescriptionConverter implements ClassDescriptionConv
     List<PsiMethod> getters = getterMethodsOf(clazz);
     for (PsiMethod getter : getters) {
       final TypeDescription typeDescription = getTypeDescription(clazz, getter);
+      List<TypeName> exceptions = new ArrayList<TypeName>();
+      for (PsiJavaCodeReferenceElement exception : getter.getThrowsList().getReferenceElements()) {
+        // TODO @twillouer
+//        exception.get
+//        exceptions.add(new TypeName(exception));
+      }
       logger.debug("Getter ; " + getter + " typeDescription : " + typeDescription);
-      getterDescriptions.add(new GetterDescription(propertyNameOf(getter), typeDescription));
+      getterDescriptions.add(new GetterDescription(propertyNameOf(getter), typeDescription, exceptions));
     }
     return getterDescriptions;
   }
